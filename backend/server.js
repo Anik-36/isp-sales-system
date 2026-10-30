@@ -21,7 +21,7 @@ app.use("/api", require("./routes/leadRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
 app.get("/", (req, res) => {
-  res.send("Attendance server is running 🚀");
+  res.send("Isp server is running");
 });
 
 app.use((req, res) => res.status(404).json({ message: "Route not found" }));
