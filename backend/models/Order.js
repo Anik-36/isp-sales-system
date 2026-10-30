@@ -6,6 +6,7 @@ const orderSchema = new mongoose.Schema(
     phone: { type: String, required: true, trim: true, maxlength: 30 },
     address: { type: String, required: true, trim: true, maxlength: 500 },
     city: { type: String, required: true, trim: true, maxlength: 100 },
+    division: { type: String, required: true, trim: true, maxlength: 100 },
     area: { type: String, required: true, trim: true, maxlength: 100 },
     package: {
       type: mongoose.Schema.Types.ObjectId,

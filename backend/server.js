@@ -20,6 +20,10 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api", require("./routes/leadRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
+app.get("/", (req, res) => {
+  res.send("Attendance server is running 🚀");
+});
+
 app.use((req, res) => res.status(404).json({ message: "Route not found" }));
 app.use((error, req, res, next) => {
   if (res.headersSent) return next(error);
@@ -29,11 +33,9 @@ app.use((error, req, res, next) => {
       : error.code === 11000
         ? 409
         : error.statusCode || 500;
-  res
-    .status(status)
-    .json({
-      message: status === 500 ? "Internal server error" : error.message,
-    });
+  res.status(status).json({
+    message: status === 500 ? "Internal server error" : error.message,
+  });
 });
 
 const port = Number(process.env.PORT) || 5000;
