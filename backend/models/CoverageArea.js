@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const coverageAreaSchema = new mongoose.Schema(
   {
     city: { type: String, required: true, trim: true, maxlength: 100 },
+    division: { type: String, required: true, trim: true, maxlength: 100 },
     areaName: { type: String, required: true, trim: true, maxlength: 100 },
   },
   { timestamps: true },
