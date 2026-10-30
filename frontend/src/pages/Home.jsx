@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowDownRight, ArrowRight, Check, Signal, ShieldCheck, Wifi } from 'lucide-react';
 

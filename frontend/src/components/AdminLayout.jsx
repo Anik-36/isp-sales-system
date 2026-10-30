@@ -1,3 +1,4 @@
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Boxes, ChartNoAxesCombined, ClipboardList, MapPinned, Users, UserRoundSearch } from 'lucide-react';
 
