@@ -9,7 +9,7 @@ const listCoverage = asyncHandler(async (req, res) => {
 const createCoverage = asyncHandler(async (req, res) => {
   const area = await CoverageArea.create({
     city: req.body.city,
-    division: req.body.division,
+    // division: req.body.division,
     areaName: req.body.areaName,
   });
   res.status(201).json(area);
