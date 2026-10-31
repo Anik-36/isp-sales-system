@@ -715,6 +715,36 @@ a {
   outline: none;
   font-size: 12px;
 }
+.password-field {
+  position: relative;
+  display: block;
+}
+.password-field input {
+  padding-right: 44px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #738079;
+}
+.password-toggle:hover,
+.password-toggle:focus-visible {
+  background: #edf1eb;
+  color: var(--ink);
+}
+.password-toggle:focus-visible {
+  outline: 2px solid #6b9b84;
+  outline-offset: 1px;
+}
 .login-form input:focus,
 .form-panel input:focus,
 .form-panel select:focus,

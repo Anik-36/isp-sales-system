@@ -11,7 +11,7 @@ export default function Navbar() {
     return (
         <header className="site-nav">
             <div className="nav-inner">
-                <Link to="/" className="brand"><span className="brand-mark"><Radio size={19} /></span><span>Northline<span className="brand-light"> Fiber</span></span></Link>
+                <Link to="/" className="brand" aria-label="Northline Fiber home" title="Go to home"><span className="brand-mark"><Radio size={19} /></span><span>Northline<span className="brand-light"> Fiber</span></span></Link>
                 <nav className="nav-links" aria-label="Main navigation">
                     <NavLink to="/packages">Plans</NavLink>
                     {user?.role === 'admin' && <NavLink to="/admin/dashboard">Admin</NavLink>}
