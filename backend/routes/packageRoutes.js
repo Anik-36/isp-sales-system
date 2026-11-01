@@ -10,10 +10,10 @@ const {
 const router = express.Router();
 router.get(
   "/",
-  (req, res, next) => {
-    if (req.query.all !== "true") return next();
-    return protect(req, res, () => authorize("admin")(req, res, next));
-  },
+  // (req, res, next) => {
+  //   if (req.query.all !== "true") return next();
+  //   return protect(req, res, () => authorize("admin")(req, res, next));
+  // },
   listPackages,
 );
 router.post("/", protect, authorize("admin"), createPackage);

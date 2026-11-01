@@ -42,7 +42,10 @@ const port = Number(process.env.PORT) || 5000;
 if (require.main === module) {
   connectDB()
     .then(() =>
-      app.listen(port, () => console.log(`API listening on port ${port}`)),
+      app.listen(port, () => {
+        console.log("cors origin", allowedOrigins);
+        console.log(`API listening on port ${port}`);
+      }),
     )
     .catch((error) => {
       console.error("Unable to start API:", error.message);
