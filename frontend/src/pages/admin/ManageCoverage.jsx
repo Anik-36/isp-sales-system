@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LoaderCircle, MapPinned, Plus, Trash2 } from 'lucide-react';
+import { LoaderCircle, MapPinned, Pencil, Plus, Trash2, X } from 'lucide-react';
 import api from '../../api/axiosInstance';
 import AdminLayout from '../../components/AdminLayout';
 
@@ -11,6 +11,7 @@ export default function ManageCoverage() {
     const [division, setDivision] = useState('Dhaka');
     const [city, setCity] = useState('Dhaka');
     const [areaName, setAreaName] = useState('');
+    const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
 
     const { data: areas = [], isLoading } = useQuery({
@@ -19,9 +20,13 @@ export default function ManageCoverage() {
     });
 
     const add = useMutation({
-        mutationFn: () => api.post('/coverage', { division, city: city.trim(), areaName: areaName.trim() }),
+        mutationFn: () => {
+            const area = { division, city: city.trim(), areaName: areaName.trim() };
+            return editingId ? api.put(`/coverage/${editingId}`, area) : api.post('/coverage', area);
+        },
         onSuccess: () => {
             client.invalidateQueries({ queryKey: ['coverage'] });
+            setEditingId(null);
             setAreaName('');
             setError('');
         },
@@ -34,17 +39,17 @@ export default function ManageCoverage() {
         onError: (e) => setError(e.response?.data?.message || 'Could not remove area.'),
     });
 
-    // City suggestions: only cities already used inside the selected division
-    const citySuggestions = useMemo(
-        () => [...new Set(areas.filter((a) => a.division === division).map((a) => a.city))].sort(),
-        [areas, division]
-    );
-
     // Group: division -> city -> areas (all sorted)
     const grouped = useMemo(() => {
         const byDivision = {};
         areas.forEach((a) => {
-            const d = a.division || 'Unassigned';
+            const city = String(a.city || '').trim();
+            const knownDivision = city.toLowerCase() === 'dhaka'
+                ? 'Dhaka'
+                : city.toLowerCase() === 'chattogram'
+                    ? 'Chattogram'
+                    : '';
+            const d = a.division || knownDivision || city || 'Other';
             byDivision[d] ??= {};
             byDivision[d][a.city] ??= [];
             byDivision[d][a.city].push(a);
@@ -67,6 +72,22 @@ export default function ManageCoverage() {
         if (window.confirm(`Remove ${area.areaName} from coverage?`)) remove.mutate(area._id);
     };
 
+    const handleEdit = (area) => {
+        setEditingId(area._id);
+        setDivision(area.division);
+        setCity(area.city);
+        setAreaName(area.areaName);
+        setError('');
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setDivision('Dhaka');
+        setCity('Dhaka');
+        setAreaName('');
+        setError('');
+    };
+
     return (
         <AdminLayout title="Coverage areas">
             <div className="admin-columns">
@@ -80,9 +101,9 @@ export default function ManageCoverage() {
                     <div className="panel-heading">
                         <div>
                             <span className="eyebrow">EXPAND SERVICE</span>
-                            <h2>Add coverage</h2>
+                            <h2>{editingId ? 'Edit coverage' : 'Add coverage'}</h2>
                         </div>
-                        <MapPinned size={20} />
+                        {editingId ? <button type="button" className="icon-button" onClick={cancelEdit} aria-label="Cancel editing"><X size={17} /></button> : <MapPinned size={20} />}
                     </div>
 
                     <label>
@@ -97,17 +118,11 @@ export default function ManageCoverage() {
                     <label>
                         City
                         <input
-                            list="coverage-cities"
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
                             required
                             placeholder="City or district"
                         />
-                        <datalist id="coverage-cities">
-                            {citySuggestions.map((name) => (
-                                <option key={name} value={name} />
-                            ))}
-                        </datalist>
                     </label>
 
                     <label>
@@ -123,8 +138,8 @@ export default function ManageCoverage() {
                     {error && <p className="form-error">{error}</p>}
 
                     <button className="button button-dark full-width" disabled={add.isPending}>
-                        {add.isPending ? <LoaderCircle className="spin" size={16} /> : <Plus size={16} />}
-                        Add area
+                        {add.isPending ? <LoaderCircle className="spin" size={16} /> : editingId ? <Pencil size={16} /> : <Plus size={16} />}
+                        {editingId ? 'Save changes' : 'Add area'}
                     </button>
                 </form>
 
@@ -174,6 +189,15 @@ export default function ManageCoverage() {
                                                                 <span className="live-dot" /> {area.areaName}
                                                             </td>
                                                             <td style={{ ...td, textAlign: 'right' }}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="icon-button"
+                                                                    title={`Edit ${area.areaName}`}
+                                                                    disabled={add.isPending || remove.isPending}
+                                                                    onClick={() => handleEdit(area)}
+                                                                >
+                                                                    <Pencil size={15} />
+                                                                </button>
                                                                 <button
                                                                     type="button"
                                                                     className="icon-button danger-icon"

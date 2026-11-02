@@ -15,7 +15,10 @@ router.get(
         Order.countDocuments(),
         Order.countDocuments({ status: "PENDING" }),
         Order.countDocuments({ status: "CONNECTED" }),
-        User.countDocuments({ role: "sales_agent" }),
+        User.countDocuments({
+          role: "sales_agent",
+          accountStatus: { $ne: "pending" },
+        }),
       ]);
     res.json({ totalOrders, pendingOrders, completedConnections, totalAgents });
   }),
@@ -26,7 +29,7 @@ router.get(
   asyncHandler(async (req, res) => {
     res.json(
       await User.find({ role: "sales_agent" })
-        .select("_id name email role createdAt")
+        .select("_id name email role accountStatus createdAt")
         .sort({ createdAt: -1 }),
     );
   }),
@@ -41,15 +44,28 @@ router.post(
       email,
       password,
       role: "sales_agent",
+      accountStatus: "active",
     });
-    res
-      .status(201)
-      .json({
-        _id: agent.id,
-        name: agent.name,
-        email: agent.email,
-        role: agent.role,
-      });
+    res.status(201).json({
+      _id: agent.id,
+      name: agent.name,
+      email: agent.email,
+      role: agent.role,
+    });
+  }),
+);
+
+router.patch(
+  "/agents/:id/approve",
+  asyncHandler(async (req, res) => {
+    const agent = await User.findOneAndUpdate(
+      { _id: req.params.id, role: "sales_agent", accountStatus: "pending" },
+      { accountStatus: "active" },
+      { new: true, runValidators: true },
+    ).select("_id name email role accountStatus createdAt");
+    if (!agent)
+      return res.status(404).json({ message: "Pending sales agent not found" });
+    res.json(agent);
   }),
 );
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { MessageCircle, X, ArrowLeft, ArrowRight, LoaderCircle } from 'lucide-react';
 import api from '../api/axiosInstance';
@@ -8,6 +8,8 @@ const emptyForm = { name: '', phone: '', address: '' };
 export default function Chatbot() {
     const [isOpen, setIsOpen] = useState(false);
     const [step, setStep] = useState('MENU');
+    const stepHistory = useRef([]);
+    const currentStep = useRef('MENU');
     const [division, setDivision] = useState('');
     const [city, setCity] = useState('');
     const [selectedArea, setSelectedArea] = useState('');
@@ -16,10 +18,32 @@ export default function Chatbot() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
+    const moveToStep = (nextStep) => {
+        if (nextStep !== currentStep.current) stepHistory.current.push(currentStep.current);
+        currentStep.current = nextStep;
+        setStep(nextStep);
+    };
+
+    const goBack = () => {
+        currentStep.current = stepHistory.current.pop() || 'MENU';
+        setStep(currentStep.current);
+        setError('');
+    };
+
     useEffect(() => {
-        const open = () => setIsOpen(true);
+        const openingTimer = window.setTimeout(() => setIsOpen(true), 2000);
+        const open = (event) => {
+            setIsOpen(true);
+            if (event.detail && Object.prototype.hasOwnProperty.call(event.detail, 'packageId')) {
+                setSelectedPkg(event.detail.packageId || '');
+                moveToStep('CITY_SELECT');
+            }
+        };
         window.addEventListener('open-connection-chat', open);
-        return () => window.removeEventListener('open-connection-chat', open);
+        return () => {
+            window.clearTimeout(openingTimer);
+            window.removeEventListener('open-connection-chat', open);
+        };
     }, []);
 
     // Fetch Packages & Active Coverage Areas
@@ -36,7 +60,7 @@ export default function Chatbot() {
     const complete = (text) => {
         setMessage(text);
         setError('');
-        setStep('SUCCESS');
+        moveToStep('SUCCESS');
     };
 
     const fail = (reason) => setError(reason?.response?.data?.message || 'Request failed. Please try again.');
@@ -65,6 +89,8 @@ export default function Chatbot() {
     const pending = orderMutation.isPending || leadMutation.isPending || callbackMutation.isPending;
 
     const reset = () => {
+        stepHistory.current = [];
+        currentStep.current = 'MENU';
         setStep('MENU');
         setDivision('');
         setCity('');
@@ -86,7 +112,7 @@ export default function Chatbot() {
         setCity(cityName);
         const matchedArea = areas.find(a => a.city === cityName);
         setDivision(matchedArea?.division || 'Dhaka');
-        setStep('AREA_SELECT');
+        moveToStep('AREA_SELECT');
     };
 
     // এরিয়া সিলেক্ট করার ফাংশন
@@ -94,7 +120,7 @@ export default function Chatbot() {
         setSelectedArea(areaObj.areaName);
         if (areaObj.division) setDivision(areaObj.division);
         if (areaObj.city) setCity(areaObj.city);
-        setStep('ORDER_FORM');
+        moveToStep('ORDER_FORM');
     };
 
     // অর্ডার সাবমিট হ্যান্ডলার
@@ -119,11 +145,12 @@ export default function Chatbot() {
                     <span>Need a hand?</span>
                 </button>
             ) : (
-                <section className="chat-panel" aria-label="Northline connection assistant">
+                <section className="chat-panel" aria-label="Circle Network connection assistant">
                     <header className="chat-header">
+                        {step !== 'MENU' && <button className="chat-back-button" onClick={goBack} aria-label="Go back to previous step"><ArrowLeft size={18} /></button>}
                         <div>
                             <span className="chat-status-dot" />
-                            <strong>Northline Assistant</strong>
+                            <strong>Circle Network Assistant</strong>
                             <small>Here to help you connect</small>
                         </div>
                         <button className="icon-button" onClick={() => setIsOpen(false)} aria-label="Close assistant">
@@ -135,16 +162,16 @@ export default function Chatbot() {
                         {/* MAIN MENU */}
                         {step === 'MENU' && (
                             <>
-                                <p className="chat-intro">What can we help you with today?</p>
-                                <button className="chat-option" onClick={() => setStep('PACKAGES')}>
+                                <p className="chat-intro">Welcome to Circle Network! How can we help you get connected today?</p>
+                                <button className="chat-option" onClick={() => moveToStep('PACKAGES')}>
                                     <span>Browse internet plans</span>
                                     <ArrowRight size={16} />
                                 </button>
-                                <button className="chat-option" onClick={() => setStep('CITY_SELECT')}>
+                                <button className="chat-option" onClick={() => moveToStep('CITY_SELECT')}>
                                     <span>Request a new connection</span>
                                     <ArrowRight size={16} />
                                 </button>
-                                <button className="chat-option" onClick={() => setStep('CALLBACK')}>
+                                <button className="chat-option" onClick={() => moveToStep('CALLBACK')}>
                                     <span>Talk to a sales agent</span>
                                     <ArrowRight size={16} />
                                 </button>
@@ -165,8 +192,8 @@ export default function Chatbot() {
                                     </div>
                                 ))}
                                 {packages.length === 0 && <p className="muted">No active plans are available yet.</p>}
-                                <button className="text-action" onClick={reset}>
-                                    <ArrowLeft size={14} /> Main menu
+                                <button className="text-action" onClick={goBack}>
+                                    <ArrowLeft size={14} /> Back
                                 </button>
                             </>
                         )}
@@ -181,12 +208,12 @@ export default function Chatbot() {
                                         <ArrowRight size={16} />
                                     </button>
                                 ))}
-                                <button className="chat-option" onClick={() => { setCity(''); setDivision(''); setStep('CUSTOM_AREA'); }}>
+                                <button className="chat-option" onClick={() => { setCity(''); setDivision(''); moveToStep('CUSTOM_AREA'); }}>
                                     Another city
                                     <ArrowRight size={16} />
                                 </button>
-                                <button className="text-action" onClick={reset}>
-                                    <ArrowLeft size={14} /> Main menu
+                                <button className="text-action" onClick={goBack}>
+                                    <ArrowLeft size={14} /> Back
                                 </button>
                             </>
                         )}
@@ -201,11 +228,11 @@ export default function Chatbot() {
                                         <ArrowRight size={16} />
                                     </button>
                                 ))}
-                                <button className="chat-option" onClick={() => setStep('CUSTOM_AREA')}>
+                                <button className="chat-option" onClick={() => moveToStep('CUSTOM_AREA')}>
                                     My area is not listed
                                     <ArrowRight size={16} />
                                 </button>
-                                <button className="text-action" onClick={() => setStep('CITY_SELECT')}>
+                                <button className="text-action" onClick={goBack}>
                                     <ArrowLeft size={14} /> Change city
                                 </button>
                             </>
@@ -320,7 +347,7 @@ export default function Chatbot() {
                                     {pending && <LoaderCircle className="spin" size={16} />}
                                     Request connection
                                 </button>
-                                <button type="button" className="text-action" onClick={() => setStep('AREA_SELECT')}>
+                                <button type="button" className="text-action" onClick={goBack}>
                                     <ArrowLeft size={14} /> Change area
                                 </button>
                             </form>

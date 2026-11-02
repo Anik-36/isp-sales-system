@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const User = require("./models/User");
 const CoverageArea = require("./models/CoverageArea");
 const Package = require("./models/Package");
+const CallbackRequest = require("./models/CallbackRequest");
+const FutureLead = require("./models/FutureLead");
 const connectDB = require("./config/db");
 
 async function seedData() {
@@ -26,37 +28,52 @@ async function seedData() {
   }
 
   const areas = [
-    { city: "Dhaka", areaName: "Uttara" },
-    { city: "Dhaka", areaName: "Ashulia" },
-    { city: "Dhaka", areaName: "Savar" },
-    { city: "Dhaka", areaName: "Mohammadpur" },
-    { city: "Chattogram", areaName: "Colonelhat" },
-    { city: "Chattogram", areaName: "Agrabad" },
-    { city: "Chattogram", areaName: "Boropol" },
+    { division: "Dhaka", city: "Dhaka", areaName: "Uttara" },
+    { division: "Dhaka", city: "Dhaka", areaName: "Ashulia" },
+    { division: "Dhaka", city: "Dhaka", areaName: "Savar" },
+    { division: "Dhaka", city: "Dhaka", areaName: "Mohammadpur" },
+    { division: "Chattogram", city: "Chattogram", areaName: "Colonelhat" },
+    { division: "Chattogram", city: "Chattogram", areaName: "Agrabad" },
+    { division: "Chattogram", city: "Chattogram", areaName: "Boropol" },
   ];
   await Promise.all(
-    areas.map(({ city, areaName }) =>
+    areas.map(({ division, city, areaName }) =>
       CoverageArea.updateOne(
         { city, areaName },
-        { $setOnInsert: { city, areaName } },
+        { $set: { division }, $setOnInsert: { city, areaName } },
         { upsert: true },
       ),
     ),
   );
   const packages = [
-    { name: "Starter Fiber", speed: "20 Mbps", price: 600 },
-    { name: "Standard Turbo", speed: "50 Mbps", price: 1000 },
-    { name: "Gamer Ultra", speed: "100 Mbps", price: 1800 },
+    { name: "Circle Home 70", speed: "70 Mbps", price: 999 },
+    { name: "Streaming Pro 100", speed: "100 Mbps", price: 1260 },
+    { name: "Power User 150", speed: "150 Mbps", price: 1500 },
+    { name: "Gamer Ultra 200", speed: "200 Mbps", price: 2000 },
   ];
   await Promise.all(
     packages.map((pkg) =>
       Package.updateOne(
         { name: pkg.name },
-        { $setOnInsert: pkg },
+        { $set: { ...pkg, isActive: true } },
         { upsert: true },
       ),
     ),
   );
+  await Package.updateMany(
+    { name: { $in: ["Starter Fiber", "Standard Turbo", "Gamer Ultra"] } },
+    { $set: { isActive: false } },
+  );
+  await Promise.all([
+    CallbackRequest.updateMany(
+      { status: "PENDING" },
+      { $set: { status: "NOT_CONTACTED" } },
+    ),
+    FutureLead.updateMany(
+      { coverageStatus: { $exists: false } },
+      { $set: { coverageStatus: "NOT_COVERED" } },
+    ),
+  ]);
   console.log("Seed completed. Existing records were preserved.");
 }
 

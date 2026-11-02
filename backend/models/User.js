@@ -15,7 +15,12 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["admin", "sales_agent"],
-      default: "sales_agent",
+      required: true,
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "pending"],
+      default: "active",
     },
   },
   { timestamps: true },
