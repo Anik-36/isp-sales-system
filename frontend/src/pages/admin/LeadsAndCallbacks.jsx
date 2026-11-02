@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LoaderCircle, PhoneCall, UserRoundSearch } from 'lucide-react';
+import { LoaderCircle, PhoneCall, Trash2, UserRoundSearch } from 'lucide-react';
 import api from '../../api/axiosInstance';
 import AdminLayout from '../../components/AdminLayout';
 
@@ -16,13 +16,17 @@ export default function LeadsAndCallbacks() {
         mutationFn: ({ id, coverageStatus }) => api.patch(`/leads/${id}/coverage`, { coverageStatus }),
         onSuccess: () => client.invalidateQueries({ queryKey: ['leads'] }),
     });
+    const deleteLead = useMutation({
+        mutationFn: (id) => api.delete(`/leads/${id}`),
+        onSuccess: () => client.invalidateQueries({ queryKey: ['leads'] }),
+    });
     const agents = (agentsQuery.data || []).filter((agent) => agent.accountStatus !== 'pending');
 
     return <AdminLayout title="Leads & callbacks">
         <div className="lead-columns">
             <section className="table-panel">
                 <div className="panel-heading"><div><span className="eyebrow">EXPANSION INTEREST</span><h2><UserRoundSearch size={19} /> Future leads <span className="count-pill">{leadsQuery.data?.length || 0}</span></h2></div></div>
-                {leadsQuery.isLoading ? <LoaderCircle className="spin" /> : leadsQuery.isError ? <p className="notice-error">Could not load leads.</p> : !leadsQuery.data?.length ? <p className="empty-state">No future leads at this time.</p> : <div className="data-list">{leadsQuery.data.map((lead) => <article className="lead-row" key={lead._id}><div className="data-main"><strong>{lead.customerName}</strong><span>{lead.city ? `${lead.city} · ` : ''}{lead.areaName}</span></div><a className="contact-action" href={`tel:${lead.phone}`}><PhoneCall size={14} /> Call customer</a><select className={`status-select status-${(lead.coverageStatus || 'NOT_COVERED').toLowerCase()}`} aria-label={`Coverage status for ${lead.areaName}`} value={lead.coverageStatus || 'NOT_COVERED'} disabled={updateLead.isPending} onChange={(event) => updateLead.mutate({ id: lead._id, coverageStatus: event.target.value })}><option value="NOT_COVERED">Not covered</option><option value="COVERED">Covered</option></select></article>)}</div>}
+                {leadsQuery.isLoading ? <LoaderCircle className="spin" /> : leadsQuery.isError ? <p className="notice-error">Could not load leads.</p> : !leadsQuery.data?.length ? <p className="empty-state">No future leads at this time.</p> : <div className="data-list">{leadsQuery.data.map((lead) => <article className="lead-row" key={lead._id}><div className="data-main"><strong>{lead.customerName}</strong><span>{lead.city ? `${lead.city} · ` : ''}{lead.areaName}</span></div><a className="phone-link" href={`tel:${lead.phone}`}>{lead.phone}</a><select className={`status-select status-${(lead.coverageStatus || 'NOT_COVERED').toLowerCase()}`} aria-label={`Coverage status for ${lead.areaName}`} value={lead.coverageStatus || 'NOT_COVERED'} disabled={updateLead.isPending} onChange={(event) => updateLead.mutate({ id: lead._id, coverageStatus: event.target.value })}><option value="NOT_COVERED">Not covered</option><option value="COVERED">Covered</option></select><button type="button" className="icon-button danger-icon" title={`Delete ${lead.areaName} request`} aria-label={`Delete ${lead.areaName} request`} disabled={deleteLead.isPending} onClick={() => { if (window.confirm(`Delete the area request for ${lead.areaName}?`)) deleteLead.mutate(lead._id); }}><Trash2 size={15} /></button></article>)}</div>}
             </section>
             <section className="table-panel">
                 <div className="panel-heading"><div><span className="eyebrow">CUSTOMER CONTACT</span><h2><PhoneCall size={19} /> Callback requests <span className="count-pill">{callbacksQuery.data?.length || 0}</span></h2></div></div>

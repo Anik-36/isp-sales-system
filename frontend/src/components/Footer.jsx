@@ -4,12 +4,24 @@ import { ArrowUpRight, CreditCard, Mail, MapPin, Phone, Radio } from 'lucide-rea
 const paymentMethods = [
     { name: 'VISA', className: 'visa' },
     { name: 'Mastercard', className: 'mastercard' },
-    { name: 'AMEX', className: 'amex' },
+    { name: 'AMERICAN EXPRESS', className: 'amex' },
+    { name: 'BRAC BANK', className: 'brac' },
+    { name: 'DBBL NEXUS', className: 'nexus' },
+    { name: 'Citytouch', className: 'citytouch' },
+    { name: 'Bank Asia', className: 'bank-asia' },
+    { name: 'Islami Bank', className: 'islami' },
+    { name: 'AB Bank', className: 'ab-bank' },
+    { name: 'City Bank', className: 'city-bank' },
+    { name: 'Fastcash', className: 'fastcash' },
+    { name: 'MTB', className: 'mtb' },
     { name: 'bKash', className: 'bkash' },
+    { name: 'MTB CASH', className: 'mtb-cash' },
+    { name: 'MyCash', className: 'mycash' },
     { name: 'Nagad', className: 'nagad' },
     { name: 'Rocket', className: 'rocket' },
     { name: 'Upay', className: 'upay' },
     { name: 'Tap', className: 'tap' },
+    { name: 'SureCash', className: 'surecash' },
 ];
 
 export default function Footer() {
@@ -28,8 +40,8 @@ export default function Footer() {
         </div>
         <div className="circle-payment-strip">
             <span className="circle-payment-label"><CreditCard size={15} /> Pay with</span>
-            <div className="circle-payment-methods">{paymentMethods.map((method) => <span className={`payment-method ${method.className}`} key={method.name}>{method.name}</span>)}</div>
-            <span className="circle-payment-secure">Secure payments</span>
+            <div className="circle-payment-methods">{paymentMethods.map((method) => <span className={`payment-method ${method.className}`} key={method.className}>{method.name}</span>)}</div>
+            <span className="sslcommerz-verified"><small>Verified by</small><strong>SSLCommerz</strong></span>
         </div>
         <div className="circle-footer-bottom"><span>© {new Date().getFullYear()} Circle Network BD. All rights reserved.</span><span>Reliable fiber. Connected Bangladesh.</span></div>
     </footer>;

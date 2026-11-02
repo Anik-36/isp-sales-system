@@ -95,6 +95,12 @@ const updateLeadCoverage = asyncHandler(async (req, res) => {
   res.json(lead);
 });
 
+const deleteLead = asyncHandler(async (req, res) => {
+  const lead = await FutureLead.findByIdAndDelete(req.params.id);
+  if (!lead) return res.status(404).json({ message: "Future lead not found" });
+  res.json({ message: "Future lead deleted" });
+});
+
 module.exports = {
   createLead,
   createCallback,
@@ -104,4 +110,5 @@ module.exports = {
   assignCallback,
   updateCallbackStatus,
   updateLeadCoverage,
+  deleteLead,
 };

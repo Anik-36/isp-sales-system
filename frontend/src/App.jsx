@@ -17,11 +17,19 @@ import Chatbot from './components/Chatbot';
 import Footer from './components/Footer';
 import { useAuth } from './context/AuthContext';
 
+function AuthEntryRoute({ children }) {
+    const { user } = useAuth();
+    if (!user) return children;
+    const destination = user.role === 'admin' ? '/admin/dashboard' : '/agent/orders';
+    return <Navigate to={destination} replace />;
+}
+
 export default function App() {
     const { user } = useAuth();
     const location = useLocation();
     const isAuthPage = /^\/(admin|agent)\/(login|register)$/.test(location.pathname);
-    const showPublicFooter = !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/agent') && !isAuthPage;
+    const isDashboard = location.pathname.startsWith('/admin/') || location.pathname.startsWith('/agent/');
+    const showPublicFooter = !isDashboard && !isAuthPage;
     return (
         <div className="min-h-screen bg-base-200 flex flex-col justify-between">
             <Navbar />
@@ -29,10 +37,10 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Navigate to="/admin/login" replace />} />
-                    <Route path="/admin/login" element={<Login role="admin" />} />
-                    <Route path="/agent/login" element={<Login role="sales_agent" />} />
-                    <Route path="/admin/register" element={<Login role="admin" register />} />
-                    <Route path="/agent/register" element={<Login role="sales_agent" register />} />
+                    <Route path="/admin/login" element={<AuthEntryRoute><Login role="admin" /></AuthEntryRoute>} />
+                    <Route path="/agent/login" element={<AuthEntryRoute><Login role="sales_agent" /></AuthEntryRoute>} />
+                    <Route path="/admin/register" element={<AuthEntryRoute><Login role="admin" register /></AuthEntryRoute>} />
+                    <Route path="/agent/register" element={<AuthEntryRoute><Login role="sales_agent" register /></AuthEntryRoute>} />
                     <Route path="/packages" element={<PackagesPage />} />
                     <Route path="/agent/orders" element={
                         <ProtectedRoute allowedRoles={['sales_agent']} loginPath="/agent/login">
@@ -83,7 +91,7 @@ export default function App() {
                 </Routes>
             </div>
             {showPublicFooter && <Footer />}
-            {!user && !isAuthPage && <Chatbot />}
+            {!isDashboard && !isAuthPage && <Chatbot />}
         </div>
     );
 }

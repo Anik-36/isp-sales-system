@@ -9,6 +9,7 @@ const {
   assignCallback,
   updateCallbackStatus,
   updateLeadCoverage,
+  deleteLead,
 } = require("../controllers/leadController");
 
 const router = express.Router();
@@ -21,6 +22,7 @@ router.patch(
   authorize("admin"),
   updateLeadCoverage,
 );
+router.delete("/leads/:id", protect, authorize("admin"), deleteLead);
 router.get("/callbacks", protect, authorize("admin"), listCallbacks);
 router.patch(
   "/callbacks/:id/assign",

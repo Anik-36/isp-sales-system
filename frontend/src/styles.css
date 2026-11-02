@@ -2859,7 +2859,7 @@ textarea.chat-input {
 
 .circle-payment-strip {
   width: min(1300px, calc(100% - 72px));
-  min-height: 60px;
+  min-height: 88px;
   margin: 0 auto 28px;
   padding: 10px 14px;
   display: flex;
@@ -2893,38 +2893,68 @@ textarea.chat-input {
 
 .circle-payment-methods {
   min-width: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   align-items: center;
-  justify-content: space-around;
-  gap: 8px;
+  gap: 5px;
   flex: 1;
 }
 
 .payment-method {
-  min-width: 54px;
-  min-height: 30px;
+  min-width: 0;
+  min-height: 29px;
   display: inline-grid;
   place-items: center;
-  padding: 0 8px;
+  padding: 3px 4px;
   border: 1px solid #e4e8ee;
-  border-radius: 5px;
+  border-radius: 4px;
   background: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
-  white-space: nowrap;
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 2px rgba(23, 33, 58, 0.06);
 }
 
 .payment-method.visa {
   color: #1a3e8a;
+  font-size: 13px;
   font-style: italic;
 }
 .payment-method.mastercard {
   color: #d84936;
-  font-size: 9px;
+  font-size: 8px;
 }
 .payment-method.amex {
   color: #23689e;
-  font-size: 9px;
+  font-size: 7px;
+  background: #eaf5ff;
+}
+.payment-method.brac,
+.payment-method.bank-asia {
+  color: #246294;
+  font-size: 7px;
+}
+.payment-method.nexus,
+.payment-method.citytouch,
+.payment-method.fastcash {
+  color: #354e82;
+  font-size: 7px;
+}
+.payment-method.islami,
+.payment-method.surecash {
+  color: #16834a;
+  font-size: 7px;
+}
+.payment-method.ab-bank {
+  color: #d93030;
+}
+.payment-method.city-bank,
+.payment-method.mtb,
+.payment-method.mtb-cash {
+  color: #bd3940;
+  font-size: 8px;
 }
 .payment-method.bkash {
   color: #bd1765;
@@ -2941,11 +2971,54 @@ textarea.chat-input {
 .payment-method.tap {
   color: #218593;
 }
+.payment-method.mycash {
+  color: #298049;
+}
 
 .circle-payment-secure {
   padding-left: 12px;
   border-left: 1px solid #dce2eb;
   color: #69758b;
+}
+
+.sslcommerz-verified {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 12px;
+  border-left: 1px solid #dce2eb;
+  white-space: nowrap;
+}
+
+.sslcommerz-verified small {
+  color: #657187;
+  font-size: 8px;
+}
+
+.sslcommerz-verified strong {
+  padding: 5px 8px;
+  border-radius: 4px;
+  color: #fff;
+  background: #1263ad;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+@media (max-width: 1000px) {
+  .circle-payment-strip {
+    flex-wrap: wrap;
+  }
+  .circle-payment-methods {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .sslcommerz-verified {
+    margin-left: auto;
+  }
 }
 
 @media (max-width: 680px) {
@@ -2976,11 +3049,16 @@ textarea.chat-input {
     order: 3;
     width: 100%;
     flex-basis: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   .circle-payment-secure {
     margin-left: auto;
+  }
+  .sslcommerz-verified {
+    order: 4;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
   }
 }
 
